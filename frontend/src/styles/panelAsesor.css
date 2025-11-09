@@ -1,0 +1,81 @@
+/* ======== ESTRUCTURA GENERAL ======== */
+.panel-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f4f5f7;
+  font-family: "Segoe UI", Roboto, Arial, sans-serif;
+  color: #333;
+}
+
+/* ======== CABECERA ======== */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #F7931D;
+  color: #fff;
+  padding: 15px 40px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.logo-area {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-titulo {
+  width: 60px;
+  border-radius: 8px;
+}
+
+.panel-header h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* ======== BOTÓN LOGOUT ======== */
+.btn-logout {
+  background-color: #fff;
+  color: #F7931D;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-logout:hover {
+  background-color: #000;
+  color: #fff;
+}
+
+/* ======== CONTENIDO PRINCIPAL ======== */
+.panel-main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
+}
+
+.panel-section {
+  background: #fff;
+  width: 100%;
+  max-width: 850px;
+  border-radius: 12px;
+  padding: 40px 50px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+}
+
+.panel-section h2 {
+  color: #000;
+  font-size: 1.6rem;
+  margin-bottom: 5px;
+}
+
+.section-description {
+  color: #666;
+  margin-bottom: 25px;
+}

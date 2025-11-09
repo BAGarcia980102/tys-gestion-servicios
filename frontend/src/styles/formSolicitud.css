@@ -1,0 +1,111 @@
+/* ======== ESTRUCTURA PRINCIPAL ======== */
+.solicitud-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+/* ======== GRILLAS DE CAMPOS ======== */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.2rem 1.5rem; /* espacio vertical / horizontal */
+}
+
+@media (max-width: 900px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ======== CAMPOS ======== */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group.full {
+  grid-column: 1 / -1; /* Ocupa toda la fila */
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #222;
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  background-color: #fff;
+  transition: border 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #F7931D;
+  box-shadow: 0 0 0 3px rgba(247, 147, 29, 0.15);
+}
+
+/* ======== SECCIONES (servicio / entrega / compra) ======== */
+.form-section {
+  background: #fff8f3;
+  border: 1px solid #f6d8b8;
+  border-left: 4px solid #F7931D;
+  padding: 25px 30px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-section h4 {
+  color: #F7931D;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* ======== BOTÓN ======== */
+.btn-enviar {
+  align-self: flex-start;
+  background: linear-gradient(90deg, #F7931D, #e67e00);
+  border: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 12px 28px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-enviar:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 10px rgba(247, 147, 29, 0.3);
+}
+
+/* ======== ALERTAS ======== */
+.alerta {
+  margin-top: 10px;
+  background: #000;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  text-align: center;
+  animation: fadein 0.3s ease;
+}
+
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
