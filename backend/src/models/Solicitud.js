@@ -1,7 +1,7 @@
 import { db } from "../config/db.js";
 
 export const Solicitud = {
-  async crear(data) {
+   async crear(data) {
     const {
       tipo,
       cliente,
@@ -18,13 +18,56 @@ export const Solicitud = {
       usuario_id,
     } = data;
 
+    // ✅ Evitar error "Bind parameters must not contain undefined"
+    const safeValues = [
+      tipo ?? null,
+      cliente ?? null,
+      direccion ?? null,
+      horario ?? null,
+      contacto ?? null,
+      telefono ?? null,
+      referencia ?? null,
+      propiedad ?? null,
+      activo_fijo ?? null,
+      falla ?? null,
+      documentacion ?? null,
+      diligencia ?? null,
+      usuario_id ?? null,
+    ];
+
     const [result] = await db.execute(
       `INSERT INTO solicitudes 
       (tipo, cliente, direccion, horario, contacto, telefono, referencia, propiedad, activo_fijo, falla, documentacion, diligencia, usuario_id, fecha_creacion) 
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [tipo, cliente, direccion, horario, contacto, telefono, referencia, propiedad, activo_fijo, falla, documentacion, diligencia, usuario_id]
+      safeValues
     );
 
     return result.insertId;
   },
+  async listarPorOperativo(idOperativo) {
+  const [rows] = await db.execute(
+    `SELECT 
+        id,
+        tipo,
+        cliente,
+        direccion,
+        horario,
+        contacto,
+        telefono,
+        referencia,
+        propiedad,
+        activo_fijo,
+        falla,
+        diligencia,
+        documentacion,
+        estado,
+        fecha_creacion
+     FROM solicitudes
+     WHERE operativo_asignado = ?
+     ORDER BY fecha_creacion DESC`,
+    [idOperativo]
+  );
+  return rows;
+}
+
 };
