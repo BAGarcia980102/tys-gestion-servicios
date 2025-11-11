@@ -1,0 +1,208 @@
+/* === Fondo general === */
+.app-container {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f9fafb 0%, #ffffff 100%);
+  display: flex;
+  flex-direction: column;
+  font-family: "Segoe UI", Roboto, sans-serif;
+}
+
+/* === Header superior === */
+.header {
+  background: #000;
+  color: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-left h1 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.logo {
+  width: 42px;
+  height: 42px;
+}
+
+.logout-btn {
+  background: #F7931D;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.logout-btn:hover {
+  background: #d97f13;
+}
+/* ==== Estilo del selector de tipo ==== */
+.input-select {
+  width: 100%;
+  max-width: 450px;
+  padding: 12px 14px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #fff;
+  transition: all 0.2s ease-in-out;
+}
+
+.input-select:focus {
+  outline: none;
+  border-color: #F7931D;
+  box-shadow: 0 0 4px rgba(247, 147, 29, 0.3);
+}
+
+
+/* ======== CONTENEDOR PRINCIPAL ======== */
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;      /* 🔥 centra horizontalmente */
+  align-items: flex-start;      /* mantiene el inicio vertical */
+  padding: 60px 20px;
+  background: #f8f9fb;          /* un fondo más suave */
+}
+
+/* ======== TARJETA DEL FORMULARIO ======== */
+.solicitud-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 45px 55px;
+  width: 100%;
+  max-width: 720px;             /* 🔥 define ancho máximo centrado */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  border-top: 6px solid #F7931D;
+  animation: fadeIn 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;          /* 🔥 centra todo el contenido interno */
+}
+
+/* ======== TÍTULO ======== */
+.solicitud-card h2 {
+  font-weight: 700;
+  color: #000;
+  margin-bottom: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;      /* 🔥 centra el título */
+  gap: 10px;
+  width: 100%;
+  text-align: center;
+}
+
+/* ======== FORMULARIO ======== */
+.solicitud-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 25px;
+  width: 100%;
+}
+
+.form-section {
+  background: #fafafa;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  padding: 25px 30px;
+  width: 100%;
+  max-width: 520px;             /* 🔥 limita ancho del bloque */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ======== CAMPOS ======== */
+.form-grid {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.solicitud-form input,
+.solicitud-form select,
+.solicitud-form textarea {
+  width: 100%;
+  max-width: 450px;             /* 🔥 ancho perfecto centrado */
+  padding: 12px 14px;
+  border: 1px solid #dcdcdc;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.2s ease-in-out;
+  background-color: #fff;
+}
+
+.solicitud-form input:focus,
+.solicitud-form select:focus,
+.solicitud-form textarea:focus {
+  outline: none;
+  border-color: #F7931D;
+  box-shadow: 0 0 4px rgba(247, 147, 29, 0.3);
+}
+
+/* ======== BOTÓN ======== */
+.btn-guardar {
+  background: #F7931D;
+  color: #fff;
+  border: none;
+  padding: 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.3s;
+  width: 100%;
+  max-width: 500px;
+}
+.btn-guardar:hover {
+  background: #e48210;
+}
+
+/* ======== MENSAJE ======== */
+.mensaje {
+  text-align: center;
+  margin-top: 18px;
+  font-weight: 500;
+  color: #000;
+}
+
+/* ======== ANIMACIÓN ======== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ======== RESPONSIVE ======== */
+@media (max-width: 700px) {
+  .solicitud-card {
+    padding: 25px 20px;
+  }
+
+  .form-section {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  .solicitud-form input,
+  .solicitud-form select,
+  .solicitud-form textarea {
+    max-width: 100%;
+  }
+}
