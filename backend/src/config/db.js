@@ -2,10 +2,21 @@ import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 dotenv.config();
 
-export const db = await mysql.createConnection({
+// ✅ Usamos createPool en lugar de createConnection para evitar bloqueos de importación
+export const db = mysql.createPool({
   host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASS,
   database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0,
 });
-console.log("✅ Conectado a la base de datos MySQL");
+
+try {
+  const connection = await db.getConnection();
+  console.log("✅ Conectado a la base de datos MySQL");
+  connection.release();
+} catch (error) {
+  console.error("❌ Error al conectar a la base de datos:", error.message);
+}
