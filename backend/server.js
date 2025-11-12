@@ -4,6 +4,10 @@ import dotenv from "dotenv";
 import authRoutes from "./src/routes/authRoutes.js";
 import solicitudRoutes from "./src/routes/solicitudRoutes.js"; // ✅ agrega esta línea
 import "./src/config/db.js";
+import usuarioRoutes from "./src/routes/usuarioRoutes.js";
+
+
+
 
 dotenv.config();
 const app = express();
@@ -14,6 +18,7 @@ app.use(express.json());
 // ✅ Rutas principales
 app.use("/api/auth", authRoutes);
 app.use("/api/solicitudes", solicitudRoutes); // ✅ registra el módulo de solicitudes
+app.use("/api/usuarios", usuarioRoutes);
 
 app.listen(process.env.PORT, () => {
   console.log(`🚀 Servidor corriendo en el puerto ${process.env.PORT}`);
