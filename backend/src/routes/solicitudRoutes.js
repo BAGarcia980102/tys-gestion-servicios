@@ -9,10 +9,11 @@ import {
   editarSolicitud,
   detalleSolicitud,
   reprogramarSolicitud,
-  archivarSolicitud
+  archivarSolicitud,
+  listarTodasSolicitudes,
 } from "../controllers/solicitudController.js"; // ✅ corregido
 import { verificarToken } from "../middlewares/authMiddleware.js";
-import { listarTodasSolicitudes, validarSolicitud } from "../controllers/solicitudController.js";
+//import { listarTodasSolicitudes, validarSolicitud } from "../controllers/solicitudController.js";
 
 
 const router = express.Router();

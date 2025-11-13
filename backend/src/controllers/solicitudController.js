@@ -27,7 +27,7 @@ export const listarTodasSolicitudes = async (req, res) => {
   }
 };
 
-export const validarSolicitud = async (req, res) => {
+/*export const validarSolicitud = async (req, res) => {
   try {
     const { id } = req.params;
     const { estado_validacion } = req.body;
@@ -37,12 +37,23 @@ export const validarSolicitud = async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: "Error al validar solicitud" });
   }
-};
+};*/
 export const listarSolicitudesOperativo = async (req, res) => {
   try {
-    const idOperativo = req.user.id; // viene del token
-    const solicitudes = await Solicitud.listarPorOperativo(idOperativo);
-    res.status(200).json(solicitudes);
+    const idOperativo = req.user.id;
+
+    const [rows] = await db.execute(`
+      SELECT *,
+        CASE
+          WHEN importancia = 'Alta' THEN 1
+          ELSE 2
+        END AS importancia_orden
+      FROM solicitudes
+      WHERE operativo_asignado = ?
+      ORDER BY importancia_orden ASC, fecha_creacion ASC
+    `, [idOperativo]);
+
+    res.status(200).json(rows);
   } catch (error) {
     console.error("Error al listar solicitudes del operativo:", error);
     res.status(500).json({ message: "Error al obtener solicitudes" });
