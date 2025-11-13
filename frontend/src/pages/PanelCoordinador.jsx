@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import LogoutButton from "../components/LogoutButton";
+import { useParams, useNavigate } from "react-router-dom";
+
 
 export default function PanelCoordinador() {
   const [solicitudes, setSolicitudes] = useState([]);
+
   const [operativos, setOperativos] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -14,12 +20,14 @@ export default function PanelCoordinador() {
         const resSolicitudes = await axios.get("http://localhost:4000/api/solicitudes", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setSolicitudes(resSolicitudes.data);
 
         const resOperativos = await axios.get("http://localhost:4000/api/usuarios/operativos", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOperativos(resOperativos.data);
+
       } catch (error) {
         console.error("Error al cargar datos", error);
       } finally {
@@ -103,131 +111,222 @@ export default function PanelCoordinador() {
         }}
       >
         {solicitudes.map((s) => {
-          const tipo = s.tipo?.toLowerCase() || "otro";
+  const tipo = s.tipo?.toLowerCase() || "otro";
+  const esIncompleta = !s.cliente || !s.direccion || !s.contacto || !s.telefono;
+  const colorBorde =
+    s.estado_validacion === "Validada"
+      ? "#28a745"
+      : esIncompleta
+      ? "#dc3545"
+      : tipoColor[tipo] || "#F7931D";
 
-          return (
-            <div
-              key={s.id}
+  return (
+    <div
+      key={s.id}
+      style={{
+        backgroundColor: "#fff",
+        border: `2px solid ${colorBorde}`,
+        borderRadius: "14px",
+        padding: "20px",
+        boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
+        transition: "transform 0.2s ease, box-shadow 0.2s ease",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "scale(1.02)";
+        e.currentTarget.style.boxShadow = "0 6px 15px rgba(0,0,0,0.15)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "scale(1)";
+        e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.08)";
+      }}
+    >
+      <div
+        style={{
+          backgroundColor: tipoColor[tipo],
+          color: "white",
+          display: "inline-block",
+          padding: "5px 12px",
+          borderRadius: "20px",
+          fontSize: "13px",
+          fontWeight: "600",
+          marginBottom: "10px",
+          textTransform: "uppercase",
+        }}
+      >
+        {s.tipo}
+      </div>
+
+      <p><strong>Cliente:</strong> {s.cliente || "—"}</p>
+      <p><strong>Dirección:</strong> {s.direccion || "—"}</p>
+      <p><strong>Horario:</strong> {s.horario || "—"}</p>
+      <p><strong>Contacto:</strong> {s.contacto || "—"}</p>
+      <p><strong>Teléfono:</strong> {s.telefono || "—"}</p>
+      <p><strong>Creado por:</strong> {s.asesor || "—"}</p>
+
+      {/* Servicio técnico */}
+      {tipo === "servicio" && (
+        <>
+          <p><strong>Referencia impresora:</strong> {s.referencia || "—"}</p>
+          <p><strong>Propiedad:</strong> {s.propiedad || "—"}</p>
+          {s.propiedad?.toLowerCase() === "tys" && (
+            <p><strong>Activo fijo:</strong> {s.activo_fijo || "—"}</p>
+          )}
+          <p><strong>Falla:</strong> {s.falla || "—"}</p>
+          <p><strong>Documentación:</strong> {s.documentacion || "—"}</p>
+        </>
+      )}
+
+      {tipo === "entrega" && (
+        <>
+          <p><strong>Diligencia:</strong> {s.diligencia || "—"}</p>
+          <p><strong>Documentación:</strong> {s.documentacion || "—"}</p>
+        </>
+      )}
+
+      {tipo === "compra" && <p><strong>Documentación:</strong> {s.documentacion || "—"}</p>}
+
+      <p>
+        <strong>Estado:</strong>{" "}
+        <span
+          style={{
+            backgroundColor: estadoColor[s.estado] || "#ccc",
+            color: "white",
+            padding: "3px 10px",
+            borderRadius: "12px",
+            fontSize: "12px",
+            fontWeight: "600",
+          }}
+        >
+          {s.estado}
+        </span>
+      </p>
+
+      {s.operativo_asignado && (
+        <p><strong>Operativo asignado:</strong> {s.operativo_asignado}</p>
+      )}
+
+      {s.fecha_asignacion && (
+        <p>
+          <strong>Fecha de asignación:</strong>{" "}
+          {new Date(s.fecha_asignacion).toLocaleString("es-CO")}
+        </p>
+      )}
+
+      <p style={{ fontSize: "13px", color: "#777", marginTop: "8px" }}>
+        <strong>Creada:</strong>{" "}
+        {new Date(s.fecha_creacion).toLocaleString("es-CO")}
+      </p>
+
+      {/* 🔴 Marcador de incompletas */}
+      {esIncompleta && (
+        <p style={{ color: "#dc3545", fontWeight: "bold" }}>
+          ⚠️ Información incompleta — Notificar asesora.
+        </p>
+      )}
+
+      {/* 🟢 Botón de validación */}
+      {!esIncompleta && s.estado_validacion !== "Validada" && (
+        <button
+          onClick={async () => {
+            try {
+              await axios.put(
+                `http://localhost:4000/api/solicitudes/validar/${s.id}`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              setSolicitudes((prev) =>
+                prev.map((item) =>
+                  item.id === s.id
+                    ? { ...item, estado_validacion: "Validada" }
+                    : item
+                )
+              );
+              alert("Solicitud validada correctamente ✅");
+            } catch (err) {
+              console.error(err);
+              alert("Error al validar la solicitud");
+            }
+          }}
+          style={{
+            backgroundColor: "#F7931D",
+            color: "#fff",
+            border: "none",
+            borderRadius: "8px",
+            padding: "8px 12px",
+            cursor: "pointer",
+            fontWeight: "600",
+            marginTop: "10px",
+          }}
+        >
+          Validar solicitud
+        </button>
+      )}      
+      
+      {/* Selector de operativo */}
+      {s.estado !== "Asignada" &&
+        // 🔸 Solo ocultar selector si es un servicio técnico de impresora propia (TYS) no validado
+        !(
+          s.tipo?.toLowerCase().includes("servicio técnico") &&
+          s.propiedad?.toLowerCase() === "tys" &&
+          s.estado_validacion !== "Validada"
+        ) && (
+          <div style={{ marginTop: "15px" }}>
+            <select
+              onChange={(e) => asignarSolicitud(s.id, e.target.value)}
+              defaultValue=""
               style={{
-                backgroundColor: "#fff",
-                border: `2px solid ${tipoColor[tipo] || "#F7931D"}`,
-                borderRadius: "14px",
-                padding: "20px",
-                boxShadow: "0 4px 10px rgba(0,0,0,0.08)",
-                transition: "transform 0.2s ease, box-shadow 0.2s ease",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.02)";
-                e.currentTarget.style.boxShadow = "0 6px 15px rgba(0,0,0,0.15)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-                e.currentTarget.style.boxShadow = "0 4px 10px rgba(0,0,0,0.08)";
+                width: "100%",
+                padding: "10px",
+                borderRadius: "8px",
+                border: "1px solid #ccc",
+                fontSize: "14px",
+                backgroundColor: "#fafafa",
+                cursor: "pointer",
               }}
             >
-              {/* Encabezado tipo */}
-              <div
-                style={{
-                  backgroundColor: tipoColor[tipo],
-                  color: "white",
-                  display: "inline-block",
-                  padding: "5px 12px",
-                  borderRadius: "20px",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  marginBottom: "10px",
-                  textTransform: "uppercase",
-                }}
-              >
-                {s.tipo}
-              </div>
+              <option value="">Seleccionar operativo...</option>
+              {operativos.map((op) => (
+                <option key={op.id} value={op.id}>
+                  {op.nombre}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
-              <p><strong>Cliente:</strong> {s.cliente}</p>
-              <p><strong>Dirección:</strong> {s.direccion}</p>
-              <p><strong>Horario:</strong> {s.horario}</p>
-              <p><strong>Contacto:</strong> {s.contacto}</p>
-              <p><strong>Teléfono:</strong> {s.telefono}</p>
+      {s.tipo?.toLowerCase().includes("servicio") &&
+        s.propiedad?.toLowerCase() === "tys" &&
+        s.estado_validacion !== "Validada" && (
+          <p style={{ color: "#dc3545", fontWeight: "600", marginTop: "8px" }}>
+            ⚠️ Debe validarse antes de poder asignar a un técnico.
+          </p>
+        )
+      }
+      <button
+  onClick={() => navigate(`/detalle-solicitud/${s.id}`)}
+  style={{
+    marginTop: "12px",
+    width: "100%",
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "10px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "600",
+  }}
+>
+  Ver detalle
+</button>
 
-              {/* Servicio técnico */}
-              {tipo === "servicio" && (
-                <>
-                  <p><strong>Referencia impresora:</strong> {s.referencia}</p>
-                  <p><strong>Propiedad:</strong> {s.propiedad}</p>
-                  {s.propiedad?.toLowerCase() === "tys" && <p><strong>Activo fijo:</strong> {s.activo_fijo}</p>}
-                  <p><strong>Falla:</strong> {s.falla}</p>
-                  <p><strong>Documentación:</strong> {s.documentacion}</p>
-                </>
-              )}
 
-              {/* Entrega */}
-              {tipo === "entrega" && (
-                <>
-                  <p><strong>Diligencia:</strong> {s.diligencia}</p>
-                  <p><strong>Documentación:</strong> {s.documentacion}</p>
-                </>
-              )}
 
-              {/* Compra */}
-              {tipo === "compra" && <p><strong>Documentación:</strong> {s.documentacion}</p>}
+    </div>
+  );
+})}
 
-              <p>
-                <strong>Estado:</strong>{" "}
-                <span
-                  style={{
-                    backgroundColor: estadoColor[s.estado] || "#ccc",
-                    color: "white",
-                    padding: "3px 10px",
-                    borderRadius: "12px",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                  }}
-                >
-                  {s.estado}
-                </span>
-              </p>
-
-              {s.operativo_asignado && <p><strong>Operativo asignado:</strong> {s.operativo_asignado}</p>}
-
-              {s.fecha_asignacion && (
-                <p>
-                  <strong>Fecha de asignación:</strong>{" "}
-                  {new Date(s.fecha_asignacion).toLocaleString("es-CO")}
-                </p>
-              )}
-
-              <p style={{ fontSize: "13px", color: "#777", marginTop: "8px" }}>
-                <strong>Creada:</strong> {new Date(s.fecha_creacion).toLocaleString("es-CO")}
-              </p>
-
-              {/* Selector de operativo */}
-              {s.estado !== "Asignada" && (
-                <div style={{ marginTop: "15px" }}>
-                  <select
-                    onChange={(e) => asignarSolicitud(s.id, e.target.value)}
-                    defaultValue=""
-                    style={{
-                      width: "100%",
-                      padding: "10px",
-                      borderRadius: "8px",
-                      border: "1px solid #ccc",
-                      fontSize: "14px",
-                      backgroundColor: "#fafafa",
-                      cursor: "pointer",
-                    }}
-                  >
-                    <option value="">Seleccionar operativo...</option>
-                    {operativos.map((op) => (
-                      <option key={op.id} value={op.id}>
-                        {op.nombre}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
-          );
-        })}
       </div>
+
     </div>
   );
 }

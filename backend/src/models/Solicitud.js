@@ -1,7 +1,8 @@
 import { db } from "../config/db.js";
 
 export const Solicitud = {
-   async crear(data) {
+
+  async crear(data) {
     const {
       tipo,
       cliente,
@@ -18,7 +19,6 @@ export const Solicitud = {
       usuario_id,
     } = data;
 
-    // ✅ Evitar error "Bind parameters must not contain undefined"
     const safeValues = [
       tipo ?? null,
       cliente ?? null,
@@ -44,9 +44,10 @@ export const Solicitud = {
 
     return result.insertId;
   },
+
   async listarPorOperativo(idOperativo) {
-  const [rows] = await db.execute(
-    `SELECT 
+    const [rows] = await db.execute(
+      `SELECT 
         id,
         tipo,
         cliente,
@@ -62,12 +63,47 @@ export const Solicitud = {
         documentacion,
         estado,
         fecha_creacion
-     FROM solicitudes
-     WHERE operativo_asignado = ?
-     ORDER BY fecha_creacion DESC`,
-    [idOperativo]
-  );
-  return rows;
-}
+      FROM solicitudes
+      WHERE operativo_asignado = ?
+      ORDER BY fecha_creacion DESC`,
+      [idOperativo]
+    );
+    return rows;
+  },
 
+  async listarTodas() {
+    const [rows] = await db.execute(
+      `SELECT 
+        s.id,
+        s.tipo,
+        s.cliente,
+        s.direccion,
+        s.horario,
+        s.contacto,
+        s.telefono,
+        s.referencia,
+        s.propiedad,
+        s.activo_fijo,
+        s.falla,
+        s.documentacion,
+        s.diligencia,
+        s.estado_validacion,
+        s.fecha_creacion,
+        u.nombre AS creado_por
+      FROM solicitudes s
+      LEFT JOIN usuarios u ON s.usuario_id = u.id
+      ORDER BY s.fecha_creacion ASC`
+    );
+    return rows;
+  },
+
+  async validar(id, estado) {
+    const [result] = await db.execute(
+      `UPDATE solicitudes 
+       SET estado_validacion = ?, fecha_validacion = NOW() 
+       WHERE id = ?`,
+      [estado, id]
+    );
+    return result;
+  }
 };
