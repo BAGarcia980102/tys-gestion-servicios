@@ -6,10 +6,12 @@ import { useParams, useNavigate } from "react-router-dom";
 
 export default function PanelCoordinador() {
   const [solicitudes, setSolicitudes] = useState([]);
+
   const [operativos, setOperativos] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
+
 
 
   useEffect(() => {
@@ -18,12 +20,14 @@ export default function PanelCoordinador() {
         const resSolicitudes = await axios.get("http://localhost:4000/api/solicitudes", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setSolicitudes(resSolicitudes.data);
 
         const resOperativos = await axios.get("http://localhost:4000/api/usuarios/operativos", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOperativos(resOperativos.data);
+
       } catch (error) {
         console.error("Error al cargar datos", error);
       } finally {
@@ -322,6 +326,7 @@ export default function PanelCoordinador() {
 })}
 
       </div>
+
     </div>
   );
 }

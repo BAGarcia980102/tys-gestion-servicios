@@ -12,11 +12,18 @@ import {
   archivarSolicitud
 } from "../controllers/solicitudController.js"; // ✅ corregido
 import { verificarToken } from "../middlewares/authMiddleware.js";
+import { listarTodasSolicitudes, validarSolicitud } from "../controllers/solicitudController.js";
+
 
 const router = express.Router();
 
 // Crear solicitud (HU-07)
 router.post("/", verificarToken, crearSolicitud);
+// Listar todas las solicitudes (coordinador)
+router.get("/todas", verificarToken, listarTodasSolicitudes);
+
+// Validar o marcar como incompleta
+router.patch("/:id/validar", verificarToken, validarSolicitud);
 
 // Listar solicitudes asignadas al operativo (HU-11)
 router.get("/operativo", verificarToken, listarSolicitudesOperativo);

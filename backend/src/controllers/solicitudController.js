@@ -11,6 +11,32 @@ export const crearSolicitud = async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Error al crear la solicitud" });
   }
+  
+};
+export const listarTodasSolicitudes = async (req, res) => {
+  try {
+    // Solo coordinadores
+    if (req.user.rol !== "coordinador") {
+      return res.status(403).json({ message: "Acceso denegado" });
+    }
+
+    const solicitudes = await Solicitud.listarTodas();
+    res.status(200).json(solicitudes);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener solicitudes" });
+  }
+};
+
+export const validarSolicitud = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { estado_validacion } = req.body;
+
+    await Solicitud.validar(id, estado_validacion);
+    res.status(200).json({ message: "Validación actualizada" });
+  } catch (error) {
+    res.status(500).json({ message: "Error al validar solicitud" });
+  }
 };
 export const listarSolicitudesOperativo = async (req, res) => {
   try {
