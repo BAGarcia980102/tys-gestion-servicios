@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import LogoutButton from "../components/LogoutButton";
+import { useParams, useNavigate } from "react-router-dom";
+
 
 export default function PanelCoordinador() {
   const [solicitudes, setSolicitudes] = useState([]);
   const [operativos, setOperativos] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -294,6 +298,23 @@ export default function PanelCoordinador() {
           </p>
         )
       }
+      <button
+  onClick={() => navigate(`/detalle-solicitud/${s.id}`)}
+  style={{
+    marginTop: "12px",
+    width: "100%",
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "10px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "600",
+  }}
+>
+  Ver detalle
+</button>
+
 
 
     </div>

@@ -6,6 +6,7 @@ import PanelGerente from "./pages/PanelGerente";
 import PanelAsesor from "./pages/PanelAsesor";
 import PrivateRoute from "./routes/PrivateRoute";
 import FormSolicitud from "./pages/FormSolicitud";
+import DetalleSolicitud from "./pages/DetalleSolicitud";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/panel-gerente" element={<PrivateRoute><PanelGerente /></PrivateRoute>} />
         <Route path="/panel-asesor" element={<PrivateRoute><PanelAsesor /></PrivateRoute>} />
         <Route path="/solicitud" element={<PrivateRoute><FormSolicitud /></PrivateRoute>} />
+        <Route path="/detalle-solicitud/:id" element={<PrivateRoute><DetalleSolicitud /></PrivateRoute>} />
       </Routes>
     </BrowserRouter>
   );
