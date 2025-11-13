@@ -1,12 +1,18 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import LogoutButton from "../components/LogoutButton";
+import { useParams, useNavigate } from "react-router-dom";
+
 
 export default function PanelCoordinador() {
   const [solicitudes, setSolicitudes] = useState([]);
+
   const [operativos, setOperativos] = useState([]);
   const [loading, setLoading] = useState(true);
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -14,12 +20,14 @@ export default function PanelCoordinador() {
         const resSolicitudes = await axios.get("http://localhost:4000/api/solicitudes", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
         setSolicitudes(resSolicitudes.data);
 
         const resOperativos = await axios.get("http://localhost:4000/api/usuarios/operativos", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setOperativos(resOperativos.data);
+
       } catch (error) {
         console.error("Error al cargar datos", error);
       } finally {
@@ -294,6 +302,23 @@ export default function PanelCoordinador() {
           </p>
         )
       }
+      <button
+  onClick={() => navigate(`/detalle-solicitud/${s.id}`)}
+  style={{
+    marginTop: "12px",
+    width: "100%",
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    padding: "10px",
+    borderRadius: "8px",
+    cursor: "pointer",
+    fontWeight: "600",
+  }}
+>
+  Ver detalle
+</button>
+
 
 
     </div>
@@ -301,6 +326,7 @@ export default function PanelCoordinador() {
 })}
 
       </div>
+
     </div>
   );
 }
