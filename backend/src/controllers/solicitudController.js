@@ -28,13 +28,29 @@ export const asignarSolicitud = async (req, res) => {
   const { operativo_id } = req.body;
 
   try {
-    // Obtener fecha de creación
-    const [solicitud] = await db.execute("SELECT fecha_creacion FROM solicitudes WHERE id = ?", [id]);
+    // 🔹 Validar que la solicitud esté validada si es de TYS
+    const [solicitud] = await db.execute(
+      "SELECT fecha_creacion, tipo, propiedad, estado_validacion FROM solicitudes WHERE id = ?",
+      [id]
+    );
+
     if (solicitud.length === 0) {
       return res.status(404).json({ message: "Solicitud no encontrada" });
     }
 
-    const fechaCreacion = new Date(solicitud[0].fecha_creacion);
+    const data = solicitud[0];
+
+    if (
+      data.tipo?.toLowerCase().includes("servicio") &&
+      data.propiedad?.toLowerCase() === "tys" &&
+      data.estado_validacion !== "Validada"
+    ) {
+      return res.status(400).json({
+        message: "❌ No se puede asignar esta solicitud. Debe validarse antes.",
+      });
+    }
+
+    const fechaCreacion = new Date(data.fecha_creacion);
     const fechaAsignacion = new Date();
     const minutos = Math.floor((fechaAsignacion - fechaCreacion) / 60000);
 
@@ -54,7 +70,6 @@ export const asignarSolicitud = async (req, res) => {
     const [op] = await db.execute("SELECT nombre FROM usuarios WHERE id = ?", [operativo_id]);
     const nombreOperativo = op[0]?.nombre || "Desconocido";
 
-    // ✅ Respuesta completa para el frontend
     res.status(200).json({
       message: "Solicitud asignada correctamente",
       tiempo: minutos,
@@ -67,10 +82,11 @@ export const asignarSolicitud = async (req, res) => {
   }
 };
 
+
 export const obtenerTodas = async (req, res) => {
   try {
-    const [rows] = await db.execute(
-      `SELECT 
+    const [rows] = await db.execute(`
+      SELECT 
         s.id,
         s.tipo,
         s.cliente,
@@ -88,15 +104,115 @@ export const obtenerTodas = async (req, res) => {
         s.operativo_asignado,
         s.fecha_creacion,
         s.fecha_asignacion,
+        s.estado_validacion,
+        s.fecha_validacion,
         u.nombre AS asesor
       FROM solicitudes s
       LEFT JOIN usuarios u ON s.usuario_id = u.id
-      ORDER BY s.fecha_creacion DESC`
-    );
-    res.json(rows);
+      ORDER BY s.fecha_creacion ASC
+    `);
+
+    res.status(200).json(rows);
   } catch (error) {
     console.error("Error al obtener solicitudes:", error);
     res.status(500).json({ message: "Error al obtener solicitudes" });
   }
+
+  
 };
+
+export const validarSolicitud = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const [solicitud] = await db.execute(
+      "SELECT fecha_creacion FROM solicitudes WHERE id = ?",
+      [id]
+    );
+
+    if (solicitud.length === 0)
+      return res.status(404).json({ message: "Solicitud no encontrada" });
+
+    const fechaCreacion = new Date(solicitud[0].fecha_creacion);
+    const fechaValidacion = new Date();
+    const minutos = Math.floor((fechaValidacion - fechaCreacion) / 60000);
+
+    // Actualiza la solicitud
+    await db.execute(
+      "UPDATE solicitudes SET estado_validacion = 'Validada', fecha_validacion = ? WHERE id = ?",
+      [fechaValidacion, id]
+    );
+
+    // Guarda en historial
+    await db.execute(
+      "INSERT INTO historial_validaciones (solicitud_id, usuario_validador, fecha_validacion, tiempo_transcurrido) VALUES (?, ?, ?, ?)",
+      [id, userId, fechaValidacion, minutos]
+    );
+
+    res.json({
+      message: "Solicitud validada correctamente",
+      tiempo_transcurrido: minutos,
+      fecha_validacion: fechaValidacion,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al validar solicitud" });
+  }
+};
+// Obtener solicitudes del asesor logueado
+export const listarPorAsesor = async (req, res) => {
+  try {
+    const usuario_id = req.user.id;
+    const [rows] = await db.execute(
+      "SELECT * FROM solicitudes WHERE usuario_id = ? ORDER BY fecha_creacion DESC",
+      [usuario_id]
+    );
+    res.json(rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al obtener solicitudes del asesor" });
+  }
+};
+
+// Editar solicitud y guardar historial
+export const editarSolicitud = async (req, res) => {
+  const { id } = req.params;
+  const cambios = req.body;
+  const usuario_id = req.user.id;
+
+  try {
+    const [actual] = await db.execute("SELECT * FROM solicitudes WHERE id = ?", [id]);
+    if (actual.length === 0) return res.status(404).json({ message: "Solicitud no encontrada" });
+    const anterior = actual[0];
+
+    // Evitar edición si ya está validada o asignada
+    if (anterior.estado_validacion === "Validada" || anterior.estado === "Asignada") {
+      return res.status(400).json({ message: "No se puede modificar una solicitud ya validada o asignada" });
+    }
+
+    // Actualizar campos dinámicamente
+    const campos = Object.keys(cambios);
+    for (const campo of campos) {
+      if (anterior[campo] != cambios[campo]) {
+        await db.execute(
+          "INSERT INTO historial_modificaciones (solicitud_id, usuario_id, campo_modificado, valor_anterior, valor_nuevo) VALUES (?,?,?,?,?)",
+          [id, usuario_id, campo, anterior[campo], cambios[campo]]
+        );
+      }
+    }
+
+    const setClause = campos.map(c => `${c} = ?`).join(", ");
+    const values = [...campos.map(c => cambios[c]), id];
+    await db.execute(`UPDATE solicitudes SET ${setClause} WHERE id = ?`, values);
+
+    res.json({ message: "Solicitud modificada correctamente" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error al modificar solicitud" });
+  }
+};
+
+
+
 
