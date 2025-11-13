@@ -7,6 +7,9 @@ import {
   validarSolicitud,
   listarPorAsesor,
   editarSolicitud,
+  detalleSolicitud,
+  reprogramarSolicitud,
+  archivarSolicitud
 } from "../controllers/solicitudController.js"; // ✅ corregido
 import { verificarToken } from "../middlewares/authMiddleware.js";
 
@@ -27,5 +30,9 @@ router.get("/todas", verificarToken, obtenerTodas);
 router.put("/validar/:id", verificarToken, validarSolicitud);
 router.get("/asesor", verificarToken, listarPorAsesor);
 router.put("/editar/:id", verificarToken, editarSolicitud);
+router.get("/detalle/:id", verificarToken, detalleSolicitud);
+router.put("/reprogramar/:id", verificarToken, reprogramarSolicitud);
+router.put("/archivar/:id", verificarToken, archivarSolicitud);
+
 
 export default router;

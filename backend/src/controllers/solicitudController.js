@@ -213,6 +213,101 @@ export const editarSolicitud = async (req, res) => {
   }
 };
 
+export const detalleSolicitud = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const [rows] = await db.execute(`
+      SELECT 
+        s.id,
+        s.tipo,
+        s.cliente,
+        s.direccion,
+        s.horario,
+        s.contacto,
+        s.telefono,
+        s.referencia,
+        s.propiedad,
+        s.activo_fijo,
+        s.falla,
+        s.documentacion,
+        s.diligencia,
+        s.estado,
+        s.operativo_asignado,
+        s.fecha_creacion,
+        s.fecha_asignacion,
+        s.estado_validacion,
+        s.fecha_validacion,
+        s.estado_final,
+        s.fecha_archivo,
+        u.nombre AS creado_por
+      FROM solicitudes s
+      JOIN usuarios u ON u.id = s.usuario_id
+      WHERE s.id = ?
+    `, [id]);
+
+    if (!rows.length) {
+      return res.status(404).json({ message: "Solicitud no encontrada" });
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error("Error en detalleSolicitud:", error);
+    res.status(500).json({ message: "Error al obtener detalle" });
+  }
+};
+
+export const reprogramarSolicitud = async (req, res) => {
+  const { id } = req.params;
+  const usuario_id = req.user.id;
+  const { comentario } = req.body;
+
+  try {
+    await db.execute(`
+      UPDATE solicitudes SET 
+      estado = 'Pendiente',
+      estado_final = 'Reprogramada',
+      operativo_asignado = NULL,
+      fecha_asignacion = NULL
+      WHERE id = ?
+    `, [id]);
+
+    await db.execute(`
+      INSERT INTO historial_movimientos (solicitud_id, usuario_id, accion, comentario)
+      VALUES (?, ?, 'Reprogramada', ?)
+    `, [id, usuario_id, comentario]);
+
+    res.json({ message: "Solicitud reprogramada correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al reprogramar" });
+  }
+};
+export const archivarSolicitud = async (req, res) => {
+  const { id } = req.params;
+  const usuario_id = req.user.id;
+
+  try {
+    await db.execute(`
+      UPDATE solicitudes SET 
+      estado_final = 'Archivada',
+      fecha_archivo = NOW()
+      WHERE id = ?
+    `, [id]);
+
+    await db.execute(`
+      INSERT INTO historial_movimientos (solicitud_id, usuario_id, accion)
+      VALUES (?, ?, 'Archivada')
+    `, [id, usuario_id]);
+
+    res.json({ message: "Solicitud archivada correctamente" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Error al archivar" });
+  }
+};
+
+
 
 
 
