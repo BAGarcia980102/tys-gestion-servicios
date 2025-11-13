@@ -3,7 +3,10 @@ import {
   crearSolicitud,
   listarSolicitudesOperativo,
   asignarSolicitud,
-  obtenerTodas
+  obtenerTodas,
+  validarSolicitud,
+  listarPorAsesor,
+  editarSolicitud,
 } from "../controllers/solicitudController.js"; // ✅ corregido
 import { verificarToken } from "../middlewares/authMiddleware.js";
 
@@ -20,5 +23,9 @@ router.put("/asignar/:id", verificarToken, asignarSolicitud);
 
 // Obtener todas las solicitudes (para coordinador)
 router.get("/", verificarToken, obtenerTodas);
+router.get("/todas", verificarToken, obtenerTodas);
+router.put("/validar/:id", verificarToken, validarSolicitud);
+router.get("/asesor", verificarToken, listarPorAsesor);
+router.put("/editar/:id", verificarToken, editarSolicitud);
 
 export default router;
